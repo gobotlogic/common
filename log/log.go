@@ -88,6 +88,10 @@ type Logger interface {
 	Fatalln(...interface{})
 	Fatalf(string, ...interface{})
 
+	Panic(...interface{})
+	Panicln(...interface{})
+	Panicf(string, ...interface{})
+
 	With(key string, value interface{}) Logger
 
 	SetFormat(string) error
@@ -177,6 +181,21 @@ func (l logger) Fatalf(format string, args ...interface{}) {
 	l.sourced().Fatalf(format, args...)
 }
 
+// Panic logs a message at level Panic on the standard logger.
+func (l logger) Panic(args ...interface{}) {
+	l.sourced().Panic(args...)
+}
+
+// Panic logs a message at level Panic on the standard logger.
+func (l logger) Panicln(args ...interface{}) {
+	l.sourced().Panicln(args...)
+}
+
+// Panicf logs a message at level Panic on the standard logger.
+func (l logger) Panicf(format string, args ...interface{}) {
+	l.sourced().Panicf(format, args...)
+}
+
 func (l logger) SetLevel(level string) error {
 	lvl, err := logrus.ParseLevel(level)
 	if err != nil {
@@ -263,6 +282,14 @@ func NewNopLogger() Logger {
 	l := logrus.New()
 	l.Out = ioutil.Discard
 	return logger{entry: logrus.NewEntry(l)}
+}
+
+func NewPassedLogger(log *logrus.Logger) Logger {
+	return logger{entry: logrus.NewEntry(log)}
+}
+
+func NewPassedLoggerUnsourced(log *logrus.Logger) Logger {
+	return unsourcedLogger{entry: logrus.NewEntry(log)}
 }
 
 // With adds a field to the logger.
@@ -361,4 +388,103 @@ func (errorLogWriter) Write(b []byte) (int, error) {
 // in the ErrorLog field of an http.Server to log HTTP server errors.
 func NewErrorLogger() *log.Logger {
 	return log.New(&errorLogWriter{}, "", 0)
+}
+
+type unsourcedLogger struct {
+	logger
+	entry *logrus.Entry
+}
+
+func (l unsourcedLogger) With(key string, value interface{}) Logger {
+	return unsourcedLogger{entry: l.entry.WithField(key, value)}
+}
+
+// Debug logs a message at level Debug on the standard logger.
+func (l unsourcedLogger) Debug(args ...interface{}) {
+	l.entry.Debug(args...)
+}
+
+// Debug logs a message at level Debug on the standard logger.
+func (l unsourcedLogger) Debugln(args ...interface{}) {
+	l.entry.Debugln(args...)
+}
+
+// Debugf logs a message at level Debug on the standard logger.
+func (l unsourcedLogger) Debugf(format string, args ...interface{}) {
+	l.entry.Debugf(format, args...)
+}
+
+// Info logs a message at level Info on the standard logger.
+func (l unsourcedLogger) Info(args ...interface{}) {
+	l.entry.Info(args...)
+}
+
+// Info logs a message at level Info on the standard logger.
+func (l unsourcedLogger) Infoln(args ...interface{}) {
+	l.entry.Infoln(args...)
+}
+
+// Infof logs a message at level Info on the standard logger.
+func (l unsourcedLogger) Infof(format string, args ...interface{}) {
+	l.entry.Infof(format, args...)
+}
+
+// Warn logs a message at level Warn on the standard logger.
+func (l unsourcedLogger) Warn(args ...interface{}) {
+	l.entry.Warn(args...)
+}
+
+// Warn logs a message at level Warn on the standard logger.
+func (l unsourcedLogger) Warnln(args ...interface{}) {
+	l.entry.Warnln(args...)
+}
+
+// Warnf logs a message at level Warn on the standard logger.
+func (l unsourcedLogger) Warnf(format string, args ...interface{}) {
+	l.entry.Warnf(format, args...)
+}
+
+// Error logs a message at level Error on the standard logger.
+func (l unsourcedLogger) Error(args ...interface{}) {
+	l.entry.Error(args...)
+}
+
+// Error logs a message at level Error on the standard logger.
+func (l unsourcedLogger) Errorln(args ...interface{}) {
+	l.entry.Errorln(args...)
+}
+
+// Errorf logs a message at level Error on the standard logger.
+func (l unsourcedLogger) Errorf(format string, args ...interface{}) {
+	l.entry.Errorf(format, args...)
+}
+
+// Fatal logs a message at level Fatal on the standard logger.
+func (l unsourcedLogger) Fatal(args ...interface{}) {
+	l.entry.Fatal(args...)
+}
+
+// Fatal logs a message at level Fatal on the standard logger.
+func (l unsourcedLogger) Fatalln(args ...interface{}) {
+	l.entry.Fatalln(args...)
+}
+
+// Fatalf logs a message at level Fatal on the standard logger.
+func (l unsourcedLogger) Fatalf(format string, args ...interface{}) {
+	l.entry.Fatalf(format, args...)
+}
+
+// Panic logs a message at level Panic on the standard logger.
+func (l unsourcedLogger) Panic(args ...interface{}) {
+	l.entry.Panic(args...)
+}
+
+// Panic logs a message at level Panic on the standard logger.
+func (l unsourcedLogger) Panicln(args ...interface{}) {
+	l.entry.Panicln(args...)
+}
+
+// Panicf logs a message at level Panic on the standard logger.
+func (l unsourcedLogger) Panicf(format string, args ...interface{}) {
+	l.entry.Panicf(format, args...)
 }
